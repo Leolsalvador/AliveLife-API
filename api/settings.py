@@ -182,6 +182,9 @@ OPENAI_API_KEY = config("OPENAI_API_KEY")
 
 CORS_ALLOWED_ORIGINS = [
     "http://localhost:3000",
+    "https://alive-life-ui.vercel.app",
+    "https://alive-life-ui-git-main-leolsalvadors-projects.vercel.app",
+    "https://alive-life-7g9e28d8v-leolsalvadors-projects.vercel.app"
 ]
 
 CORS_ORIGIN_ALLOW_ALL = False
