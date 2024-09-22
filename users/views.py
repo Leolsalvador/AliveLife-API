@@ -4,6 +4,8 @@ from rest_framework_simplejwt.tokens import RefreshToken
 from rest_framework.views import APIView
 from rest_framework import status
 from rest_framework.response import Response
+from rest_framework_simplejwt.authentication import JWTAuthentication
+from rest_framework.permissions import IsAuthenticated
 from django.contrib.auth.models import User
 from drf_yasg.utils import swagger_auto_schema
 
@@ -67,3 +69,11 @@ class UserView(APIView):
             return False
         except Session.DoesNotExist:
             return False
+
+
+class VerifyTokenView(APIView):
+    authentication_classes = [JWTAuthentication]
+    permission_classes = [IsAuthenticated]
+
+    def post(self, request):
+        return Response(data={'message': 'Token is valid'}, status=status.HTTP_200_OK)
