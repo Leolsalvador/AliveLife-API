@@ -52,6 +52,7 @@ INSTALLED_APPS = [
 ]
 
 MIDDLEWARE = [
+    'corsheaders.middleware.CorsMiddleware',
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
@@ -59,7 +60,6 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
-    'corsheaders.middleware.CorsMiddleware',
     'axes.middleware.AxesMiddleware',
     'whitenoise.middleware.WhiteNoiseMiddleware',
 ]
@@ -134,6 +134,10 @@ REST_FRAMEWORK = {
     ),
 }
 
+SESSION_COOKIE_AGE = 1800
+
+SESSION_EXPIRE_AT_BROWSER_CLOSE = False
+
 SIMPLE_JWT = {
     'ACCESS_TOKEN_LIFETIME': timedelta(days=1),
     'REFRESH_TOKEN_LIFETIME': timedelta(days=1),
@@ -170,7 +174,6 @@ USE_I18N = True
 
 USE_TZ = True
 
-
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/4.2/howto/static-files/
 
@@ -191,10 +194,30 @@ MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 OPENAI_API_KEY = config("OPENAI_API_KEY")
 
 CORS_ALLOWED_ORIGINS = [
+    # "http://localhost:3000",
     "http://localhost:3000",
     "https://alive-life-ui.vercel.app",
     "https://alive-life-ui-git-main-leolsalvadors-projects.vercel.app",
     "https://alive-life-7g9e28d8v-leolsalvadors-projects.vercel.app"
+]
+
+CORS_ALLOW_METHODS = [
+    "GET",
+    "POST",
+    "PUT",
+    "DELETE",
+    "OPTIONS",
+    "PATCH",
+]
+
+CORS_ALLOW_HEADERS = [
+    "authorization",
+    "content-type",
+    "x-csrftoken",
+    "accept",
+    "origin",
+    "user-agent",
+    "x-requested-with",
 ]
 
 CORS_ORIGIN_ALLOW_ALL = False

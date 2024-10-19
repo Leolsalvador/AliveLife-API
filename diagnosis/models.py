@@ -7,6 +7,7 @@ class Diagnosis(models.Model):
     Medical = models.ForeignKey(User, related_name='medical', on_delete=models.CASCADE)
     patient = models.ForeignKey(User, related_name='patient', on_delete=models.CASCADE)
     pdf = models.ForeignKey('pdf.PDF', on_delete=models.CASCADE, null=True, blank=True)
+    approved = models.BooleanField(null=True, blank=True)
     
     def __str__(self):
         return self.diagnosis

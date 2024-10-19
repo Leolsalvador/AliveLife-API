@@ -9,6 +9,7 @@ from .serializers import FileSerializer, DeleteFileSerializer
 from django.db.models import Q
 from drf_yasg.utils import swagger_auto_schema
 from .controller import extract_text_from_pdf
+from diagnosis.models import Diagnosis
 
 
 class FileView(APIView):
@@ -26,14 +27,17 @@ class FileView(APIView):
         
         file = request.FILES.get('file')
         name = request.data.get('name')
+
+        if Files.objects.filter(name=name).exists():
+            return Response({'message': 'Arquivo já existe'}, status=status.HTTP_400_BAD_REQUEST)
         
         if file and name:
-            Files.objects.create(file=file, name=name, user=request.user, patient=request.user)
+            file_up = Files.objects.create(file=file, name=name, user=request.user, patient=request.user)
 
             pdf = extract_text_from_pdf(file)
             PDF.objects.create(file=Files.objects.last(), text=pdf)
 
-            return Response({'success': 'Arquivo enviado com sucesso!'}, status=status.HTTP_201_CREATED)
+            return Response({'success': 'Arquivo enviado com sucesso!', 'content': {pdf}, 'id': {file_up.id}}, status=status.HTTP_201_CREATED)
         
         return Response({'error': 'Dados inválidos.'}, status=status.HTTP_400_BAD_REQUEST)
     
@@ -43,7 +47,26 @@ class FileView(APIView):
 
     def get(self, request):
         files = Files.objects.filter(Q(user=request.user) | Q(patient=request.user))
-        serializer = FileSerializer(files, many=True)
+
+        approved_files = []
+        for file in files:
+            diagnosis = Diagnosis.objects.filter(pdf__file=file, approved=True)
+            if diagnosis.exists():
+                approved_files.append(file)
+
+        serializer = FileSerializer(approved_files, many=True)
+        return Response(serializer.data, status=status.HTTP_200_OK)
+
+    def patch(self, request, id):
+        files = Files.objects.filter(Q(user=request.user) & Q(patient=id))
+
+        approved_files = []
+        for file in files:
+            diagnosis = Diagnosis.objects.filter(pdf__file=file, approved=True)
+            if diagnosis.exists():
+                approved_files.append(file)
+
+        serializer = FileSerializer(approved_files, many=True)
         return Response(serializer.data, status=status.HTTP_200_OK)
     
     @swagger_auto_schema(
@@ -51,12 +74,7 @@ class FileView(APIView):
             request_body=DeleteFileSerializer,
             responses={200: 'Arquivo deletado com sucesso!', 400: 'ID inválido.'})
 
-    def delete(self, request):
-        serializer = DeleteFileSerializer(data=request.data)
-        serializer.is_valid(raise_exception=True)
-
-        id = request.data.get('id')
-        
+    def delete(self, request, id):
         if id:
             file = Files.objects.filter(id=id).first()
             

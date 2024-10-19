@@ -1,5 +1,6 @@
 import os
 
+from rest_framework.permissions import BasePermission
 from rest_framework_simplejwt.tokens import RefreshToken
 from rest_framework.views import APIView
 from rest_framework import status
@@ -53,10 +54,19 @@ class UserView(APIView):
         request.session.save()
 
         refresh = RefreshToken.for_user(user)
+
+        if user.groups.filter(name='Médico').exists():
+            user_role = 'Médico'
+        elif user.groups.filter(name='Paciente').exists():
+            user_role = 'Paciente'
+        else:
+            user_role = 'Desconhecido'
+
         return Response({
             'refresh': str(refresh),
             'access': str(refresh.access_token),
             'sessionid': request.session.session_key,
+            'user_role': user_role
         }, status=status.HTTP_200_OK)
 
     
@@ -77,3 +87,29 @@ class VerifyTokenView(APIView):
 
     def post(self, request):
         return Response(data={'message': 'Token is valid'}, status=status.HTTP_200_OK)
+
+class IsDoctor(BasePermission):
+    def has_permission(self, request, view):
+        return request.user.groups.filter(name='Médico').exists()
+
+class IsPatient(BasePermission):
+    def has_permission(self, request, view):
+        return request.user.groups.filter(name='Paciente').exists()
+
+class PatientListView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request):
+        patients = User.objects.filter(groups__name='Paciente')
+
+        formatted_patients = [
+            {
+                'name': f"{patient.first_name} {patient.last_name}",
+                'avatar': '/path-to-avatar.png',
+                'id': f'{patient.id}'
+            }
+            for patient in patients
+        ]
+
+
+        return Response({'patients': formatted_patients}, status=status.HTTP_200_OK)
