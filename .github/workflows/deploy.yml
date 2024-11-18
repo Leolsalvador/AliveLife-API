@@ -3,7 +3,7 @@ name: Deploy para Servidor
 on:
   push:
     branches:
-      - main  # Ou a branch que você usa para deploy
+      - main  # Ou outra branch de deploy
 
 jobs:
   deploy:
@@ -18,17 +18,16 @@ jobs:
       with:
         ssh-private-key: ${{ secrets.DEPLOY_KEY }}
 
-    - name: Remover Pasta no Servidor
+    - name: Garantir Diretório no Servidor
       run: |
-        ssh -o StrictHostKeyChecking=no root@142.93.72.190 "rm -rf /AliveLife"
+        ssh -o StrictHostKeyChecking=no root@142.93.72.190 "
+        rm -rf /AliveLife &&
+        mkdir -p /AliveLife
+        "
 
-    - name: Criar Pasta de Build
-      run: mkdir -p root_folder
-    - name: Gerar Arquivos na Pasta
-      run: echo "Hello World" > root_folder/teste.txt
     - name: Subir Arquivos para o Servidor
       run: |
-        scp -r ./* root@142.93.72.190:/AliveLife/
+        scp -r root_folder/* root@142.93.72.190:/AliveLife/
 
     - name: Construir e Rodar Docker no Servidor
       run: |
