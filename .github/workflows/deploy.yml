@@ -24,7 +24,7 @@ jobs:
 
     - name: Subir Arquivos para o Servidor
       run: |
-        scp -r . usuario@ip-servidor:/AliveLife
+        scp -r . root@142.93.72.190:/AliveLife
 
     - name: Construir e Rodar Docker no Servidor
       run: |
