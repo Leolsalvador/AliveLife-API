@@ -22,9 +22,13 @@ jobs:
       run: |
         ssh -o StrictHostKeyChecking=no root@142.93.72.190 "rm -rf /AliveLife"
 
+    - name: Criar Pasta de Build
+      run: mkdir -p root_folder
+    - name: Gerar Arquivos na Pasta
+      run: echo "Hello World" > root_folder/teste.txt
     - name: Subir Arquivos para o Servidor
       run: |
-        scp -r ./root_folder/* root@142.93.72.190:/AliveLife
+        scp -r root_folder/* root@142.93.72.190:/AliveLife
 
     - name: Construir e Rodar Docker no Servidor
       run: |
