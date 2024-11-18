@@ -49,7 +49,6 @@ def diagnosisControl(chunk, patient):
                 "content": prompt
             }
         ],
-        max_tokens=500,
         temperature=0.5,
     )
 

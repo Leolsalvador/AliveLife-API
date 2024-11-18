@@ -1,0 +1,48 @@
+version: '3.7'
+
+services:
+  postgres-alivelife:
+    image: postgres:latest
+    volumes:
+      - postgres-alivelife-volume:/var/lib/postgresql/data
+    environment:
+      POSTGRES_DB: loqed-alivelife
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: 1q2w3e!
+    networks:
+      - alivelife-network
+
+  django_gunicorn:
+    volumes:
+      - ./static:/app/static
+      - ./media:/app/media
+    env_file:
+      - .env
+    build:
+      context: .
+    ports:
+      - "8000:8000"
+    depends_on:
+      - postgres-alivelife
+    networks:
+      - alivelife-network
+
+  nginx:
+    build: ./nginx
+    volumes:
+      - ./static:/app/static
+      - ./media:/app/media
+    ports:
+      - "80:80"
+    depends_on:
+      - django_gunicorn
+    networks:
+      - alivelife-network
+
+volumes: 
+  postgres-alivelife-volume:
+  static:
+  media:
+
+networks:
+  alivelife-network:
