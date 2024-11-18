@@ -1,0 +1,35 @@
+name: Deploy para Servidor
+
+on:
+  push:
+    branches:
+      - main  # Ou a branch que você usa para deploy
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout do Código
+      uses: actions/checkout@v3
+
+    - name: Configurar SSH
+      uses: webfactory/ssh-agent@v0.8.1
+      with:
+        ssh-private-key: ${{ secrets.DEPLOY_KEY }}
+
+    - name: Remover Pasta no Servidor
+      run: |
+        ssh -o StrictHostKeyChecking=no root@142.93.72.190 "rm -rf /AliveLife"
+
+    - name: Subir Arquivos para o Servidor
+      run: |
+        scp -r . usuario@ip-servidor:/AliveLife
+
+    - name: Construir e Rodar Docker no Servidor
+      run: |
+        ssh -o StrictHostKeyChecking=no root@142.93.72.190 "
+        cd /AliveLife &&
+        docker-compose down &&
+        docker-compose up -d --build
+        "
