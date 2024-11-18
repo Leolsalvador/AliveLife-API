@@ -28,7 +28,7 @@ jobs:
       run: echo "Hello World" > root_folder/teste.txt
     - name: Subir Arquivos para o Servidor
       run: |
-        scp -r root_folder/* root@142.93.72.190:/AliveLife
+        scp -r ./* root@142.93.72.190:/AliveLife/
 
     - name: Construir e Rodar Docker no Servidor
       run: |
