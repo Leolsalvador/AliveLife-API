@@ -10,14 +10,17 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
+    # Checkout do repositório
     - name: Checkout do Código
       uses: actions/checkout@v3
 
+    # Configuração do SSH
     - name: Configurar SSH
       uses: webfactory/ssh-agent@v0.5.3
       with:
         ssh-private-key: ${{ secrets.DEPLOY_KEY }}
 
+    # Garantir Diretório no Servidor
     - name: Garantir Diretório no Servidor
       run: |
         ssh -o StrictHostKeyChecking=no root@142.93.72.190 "
@@ -25,13 +28,12 @@ jobs:
         mkdir -p /AliveLife
         "
 
-    - name: Criar Pasta de Build
-      run: mkdir -p root_folder
-
+    # Subir Arquivos para o Servidor
     - name: Subir Arquivos para o Servidor
       run: |
-        scp -r root_folder/* root@142.93.72.190:/AliveLife/
+        scp -o StrictHostKeyChecking=no -r ./* root@142.93.72.190:/AliveLife/
 
+    # Construir e Rodar Docker no Servidor
     - name: Construir e Rodar Docker no Servidor
       run: |
         ssh -o StrictHostKeyChecking=no root@142.93.72.190 "
