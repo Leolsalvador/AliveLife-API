@@ -44,6 +44,9 @@ jobs:
         echo 'KEY_CRYPTOGRAPHY=${{ secrets.KEY_CRYPTOGRAPHY }}' >> /AliveLife/.env &&
         echo 'IV_CRYPTOGRAPHY=${{ secrets.IV_CRYPTOGRAPHY }}' >> /AliveLife/.env &&
         echo 'OPENAI_API_KEY=${{ secrets.OPENAI_API_KEY }}' >> /AliveLife/.env
+        echo 'SUPER_USER_NAME=${{ secrets.SUPER_USER_NAME }}' >> /AliveLife/.env
+        echo 'SUPER_USER_PASSWORD=${{ secrets.SUPER_USER_PASSWORD }}' >> /AliveLife/.env
+        echo 'USER_DATABASE=${{ secrets.USER_DATABASE }}' >> /AliveLife/.env
         "
 
     # Construir e Rodar Docker no Servidor
