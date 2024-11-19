@@ -43,7 +43,7 @@ services:
       - /etc/ssl/certs/nginx-selfsigned.crt:/etc/ssl/certs/nginx-selfsigned.crt
       - /etc/ssl/private/nginx-selfsigned.key:/etc/ssl/private/nginx-selfsigned.key
     networks:
-      - intranet-network
+      - alivelife-network
 
 volumes: 
   postgres-alivelife-volume:
