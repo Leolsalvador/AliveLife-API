@@ -198,6 +198,11 @@ CORS_ALLOWED_ORIGINS = [
     "https://alive-life-7g9e28d8v-leolsalvadors-projects.vercel.app"
 ]
 
+CSRF_TRUSTED_ORIGINS = [
+    'https://142.93.72.190',
+    'http://142.93.72.190'
+]
+
 CORS_ALLOW_METHODS = [
     "GET",
     "POST",
