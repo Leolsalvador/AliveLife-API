@@ -31,7 +31,7 @@ jobs:
     # Subir Arquivos para o Servidor
     - name: Subir Arquivos para o Servidor
       run: |
-        scp -r . root@142.93.72.190:/AliveLife
+        scp -o StrictHostKeyChecking=no -r ./* root@142.93.72.190:/AliveLife/
       
     - name: Criar .env no Servidor
       run: |
