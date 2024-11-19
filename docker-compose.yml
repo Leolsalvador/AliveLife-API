@@ -40,7 +40,6 @@ services:
     depends_on:
       - django_gunicorn
     volumes:
-      - ./nginx.conf:/etc/nginx/conf.d/default.conf
       - ./app/static:/app/static
       - ./app/media:/app/media
       - /etc/ssl/certs/nginx-selfsigned.crt:/etc/ssl/certs/nginx-selfsigned.crt
