@@ -192,7 +192,6 @@ MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 OPENAI_API_KEY = config("OPENAI_API_KEY")
 
 CORS_ALLOWED_ORIGINS = [
-    # "http://localhost:3000",
     "http://localhost:3000",
     "https://alive-life-ui.vercel.app",
     "https://alive-life-ui-git-main-leolsalvadors-projects.vercel.app",

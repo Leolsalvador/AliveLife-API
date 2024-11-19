@@ -38,8 +38,8 @@ services:
     depends_on:
       - django_gunicorn
     volumes:
-      - ./app/static:/app/static
-      - ./app/media:/app/media
+      - ./static:/static
+      - ./media:/media
       - /etc/ssl/certs/nginx-selfsigned.crt:/etc/ssl/certs/nginx-selfsigned.crt
       - /etc/ssl/private/nginx-selfsigned.key:/etc/ssl/private/nginx-selfsigned.key
     networks:
