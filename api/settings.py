@@ -196,7 +196,8 @@ CORS_ALLOWED_ORIGINS = [
     "https://alive-life-ui.vercel.app",
     "https://alive-life-ui-git-main-leolsalvadors-projects.vercel.app",
     "https://alive-life-7g9e28d8v-leolsalvadors-projects.vercel.app",
-    "https://alive-life-nxig9hocu-leolsalvadors-projects.vercel.app/"
+    "https://alive-life-nxig9hocu-leolsalvadors-projects.vercel.app/",
+    "http://159.65.221.183"
 ]
 
 CSRF_TRUSTED_ORIGINS = [
