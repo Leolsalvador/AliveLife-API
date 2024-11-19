@@ -42,6 +42,8 @@ services:
       - ./app/media:/app/media
       - /etc/ssl/certs/nginx-selfsigned.crt:/etc/ssl/certs/nginx-selfsigned.crt
       - /etc/ssl/private/nginx-selfsigned.key:/etc/ssl/private/nginx-selfsigned.key
+    networks:
+      - intranet-network
 
 volumes: 
   postgres-alivelife-volume:
