@@ -25,6 +25,19 @@ jobs:
     - name: Subir Arquivos para o Servidor
       run: |
         scp -r . usuario@ip-servidor:/AliveLife
+      
+    - name: Criar .env no Servidor
+      run: |
+        ssh -o StrictHostKeyChecking=no root@142.93.72.190 "
+        echo 'DJANGO_SECRET_KEY=${{ secrets.DJANGO_SECRET_KEY }}' > /AliveLife/.env &&
+        echo 'HOST_DATABASE=${{ secrets.HOST_DATABASE }}' >> /AliveLife/.env &&
+        echo 'NAME_DATABASE=${{ secrets.NAME_DATABASE }}' >> /AliveLife/.env &&
+        echo 'USER_DATABASE=${{ secrets.USER_DATABASE }}' >> /AliveLife/.env &&
+        echo 'PASSWORD_DATABASE=${{ secrets.PASSWORD_DATABASE }}' >> /AliveLife/.env &&
+        echo 'KEY_CRYPTOGRAPHY=${{ secrets.KEY_CRYPTOGRAPHY }}' >> /AliveLife/.env &&
+        echo 'IV_CRYPTOGRAPHY=${{ secrets.IV_CRYPTOGRAPHY }}' >> /AliveLife/.env &&
+        echo 'OPENAI_API_KEY=${{ secrets.OPENAI_API_KEY }}' >> /AliveLife/.env
+        "
 
     - name: Construir e Rodar Docker no Servidor
       run: |
