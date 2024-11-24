@@ -1,4 +1,6 @@
 import os
+import random
+import string
 
 from rest_framework.permissions import BasePermission
 from rest_framework_simplejwt.tokens import RefreshToken
@@ -10,7 +12,7 @@ from rest_framework.permissions import IsAuthenticated
 from django.contrib.auth.models import User
 from drf_yasg.utils import swagger_auto_schema
 
-from .serializers import LoginSerializer
+from .serializers import LoginSerializer, RegisterSerializer
 
 from Crypto.Cipher import AES
 from Crypto.Util.Padding import unpad
@@ -19,6 +21,7 @@ from decouple import config
 from django.contrib.sessions.models import Session
 from django.utils import timezone
 from datetime import timedelta
+from .models import Medico, Paciente
 
 
 class UserView(APIView):
@@ -59,6 +62,8 @@ class UserView(APIView):
             user_role = 'Médico'
         elif user.groups.filter(name='Paciente').exists():
             user_role = 'Paciente'
+        elif user.groups.filter(name='Atendente').exists():
+            user_role = 'Atendente'
         else:
             user_role = 'Desconhecido'
 
@@ -68,7 +73,6 @@ class UserView(APIView):
             'sessionid': request.session.session_key,
             'user_role': user_role
         }, status=status.HTTP_200_OK)
-
     
     @staticmethod
     def verify_session(sessionid):
@@ -79,6 +83,51 @@ class UserView(APIView):
             return False
         except Session.DoesNotExist:
             return False
+
+    def get(self, request):
+        formatted_users = []
+
+        # Obtendo apenas médicos e pacientes
+        medicos = User.objects.filter(medico__isnull=False).select_related('medico')
+        pacientes = User.objects.filter(paciente__isnull=False).select_related('paciente')
+
+        # Processando médicos
+        for user in medicos:
+            medico = user.medico  # Relacionamento direto
+            user_data = {
+                'name': f"{user.first_name} {user.last_name}",
+                'username': user.username,
+                'email': user.email,
+                'role': "Médico",
+                'additional_info': {
+                    'nome': medico.nome,
+                    'email': medico.email,
+                    'cpf': medico.cpf,
+                    'data_nascimento': medico.data_nascimento,
+                    'crm': medico.crm,
+                    'uf_crm': medico.uf_crm,
+                }
+            }
+            formatted_users.append(user_data)
+
+        # Processando pacientes
+        for user in pacientes:
+            paciente = user.paciente  # Relacionamento direto
+            user_data = {
+                'name': f"{user.first_name} {user.last_name}",
+                'username': user.username,
+                'email': user.email,
+                'role': "Paciente",
+                'additional_info': {
+                    'nome': paciente.nome,
+                    'email': paciente.email,
+                    'cpf': paciente.cpf,
+                    'data_nascimento': paciente.data_nascimento,
+                }
+            }
+            formatted_users.append(user_data)
+
+        return Response({'users': formatted_users}, status=status.HTTP_200_OK)
 
 
 class VerifyTokenView(APIView):
@@ -113,3 +162,66 @@ class PatientListView(APIView):
 
 
         return Response({'patients': formatted_patients}, status=status.HTTP_200_OK)
+
+
+class RegisterUserView(APIView):
+    authentication_classes = [JWTAuthentication]
+    permission_classes = [IsAuthenticated]
+    serializer_class = RegisterSerializer
+
+    def post(self, request):
+        serializer = RegisterSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+
+        breakpoint()
+        data = serializer.validated_data
+
+        username = data.get("name", "").lower().replace(" ", "")
+        password = ''.join(random.choices(string.ascii_letters + string.digits, k=8))
+
+        try:
+            user = User.objects.create_user(
+                username=username,
+                password=password,
+                first_name=data.get("name", ""),
+                last_name=data.get("surname", ""),
+                email=data.get("email", "")
+            )
+
+            if data.get("role") == "Profissional":
+                Medico.objects.create(
+                    user=user,
+                    nome=data.get("name", ""),
+                    email=data.get("email", ""),
+                    cpf=data.get("cpf", ""),
+                    data_nascimento=data.get("birthDate", ""),
+                    crm=data.get("crm", ""),
+                    uf_crm=data.get("ufCrm", "")
+                )
+            elif data.get("role") == "Paciente":
+                Paciente.objects.create(
+                    user=user,
+                    nome=data.get("name", ""),
+                    email=data.get("email", ""),
+                    cpf=data.get("cpf", ""),
+                    data_nascimento=data.get("birthDate", "")
+                )
+            else:
+                return Response(
+                    {"message": "O campo 'role' precisa ser 'Profissional' ou 'Paciente'."},
+                    status=status.HTTP_400_BAD_REQUEST
+                )
+
+            return Response(
+                {
+                    "message": "Usuário criado com sucesso!",
+                    "username": username,
+                    "password": password,
+                },
+                status=status.HTTP_201_CREATED
+            )
+        except Exception as e:
+            return Response(
+                {"message": f"Erro ao criar usuário: {str(e)}"},
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR
+            )
