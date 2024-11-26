@@ -105,7 +105,6 @@ class UserView(APIView):
                     'data_nascimento': medico.data_nascimento,
                     'crm': medico.crm,
                     'uf_crm': medico.uf_crm,
-                    'status': medico.status,
                 }
             }
             formatted_users.append(user_data)
@@ -356,7 +355,7 @@ class UpdateUserView(APIView):
                 status=status.HTTP_404_NOT_FOUND
             )
 
-        user.is_active = False
+        user.is_active = not user.is_active
         user.save()
 
         return Response(
