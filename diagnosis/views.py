@@ -5,7 +5,7 @@ from .controller import diagnosisControl
 from pdf.models import PDF
 from rest_framework.permissions import IsAuthenticated
 from rest_framework_simplejwt.authentication import JWTAuthentication
-from .serializers import DiagnosisSerializer, ListDiagnosisSerializer
+from .serializers import DiagnosisSerializer, ListDiagnosisSerializer, UpdateDiagnosisSerializer
 from .models import Diagnosis
 from django.shortcuts import get_object_or_404
 from pdf.models import Files
@@ -91,3 +91,20 @@ class DiagnosisView(APIView):
 
         serializer = ListDiagnosisSerializer(diagnosis)
         return Response(data=serializer.data, status=status.HTTP_200_OK)
+
+
+class UpdateDiagnosisView(APIView):
+    def put(self, request, pk):
+        diagnosis = Diagnosis.objects.get(id=pk)
+        serializer = UpdateDiagnosisSerializer(data=request.data)
+
+        if serializer.is_valid():
+            diagnosis.diagnosis = serializer.data.get('diagnosis')
+            diagnosis.save()
+
+            diagnosis = Diagnosis.objects.get(id=pk)
+            serializer = ListDiagnosisSerializer(diagnosis)
+
+            return Response(data=serializer.data, status=status.HTTP_200_OK)
+        else:
+            return Response(data=serializer.errors, status=status.HTTP_400_BAD_REQUEST)

@@ -12,3 +12,7 @@ class ListDiagnosisSerializer(serializers.Serializer):
     patient = serializers.CharField()
     pdf = serializers.CharField()
     approved = serializers.BooleanField()
+
+
+class UpdateDiagnosisSerializer(serializers.Serializer):
+    diagnosis = serializers.CharField()
