@@ -87,20 +87,19 @@ class DiagnosisView(APIView):
         if not diagnosis.exists():
             return Response({"detail": "Diagnosis not found."}, status=status.HTTP_404_NOT_FOUND)
 
-        Medical = Medico.objects.get(user=request.user)
-
         diagnosis_data = []
         for diag in diagnosis:
+            Medical = Medico.objects.get(user=diag.Medical)
             diagnosis_data.append({
                 "id": diag.id,
                 "diagnosis": diag.diagnosis,
-                "Medical": diag.Medical.first_name,  # Nome do médico
-                "Medical_last_name": diag.Medical.last_name,  # Sobrenome do médico
+                "Medical": diag.Medical.first_name,
+                "Medical_last_name": diag.Medical.last_name,
                 "CRM": Medical.crm,
                 "uf_crm": Medical.uf_crm,
-                "patient": diag.patient.first_name,  # Nome do paciente
-                "patient_last_name": diag.patient.last_name,  # Sobrenome do paciente
-                "pdf": diag.pdf.file.name,  # Nome do arquivo PDF associado
+                "patient": diag.patient.first_name,
+                "patient_last_name": diag.patient.last_name,
+                "pdf": diag.pdf.file.name,
                 "approved": diag.approved,
             })
 
