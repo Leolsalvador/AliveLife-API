@@ -13,6 +13,11 @@ from rest_framework import status
 from drf_yasg.utils import swagger_auto_schema
 from django.db.models import Q
 from django.contrib.auth.models import User
+from users.models import Medico
+from Crypto.Cipher import AES
+from base64 import b64decode
+from Crypto.Util.Padding import unpad
+from decouple import config
 
 
 class DiagnosisView(APIView):
@@ -28,7 +33,21 @@ class DiagnosisView(APIView):
         serializer = self.serializer_class(data=request.data)
         serializer.is_valid(raise_exception=True)
 
+        password = serializer.validated_data.get('password')
         patient_id  = serializer.validated_data.get('idUser')
+
+        encrypted_password = serializer.validated_data.get('password')
+
+        key = config('KEY_CRYPTOGRAPHY').encode()
+        iv = config('IV_CRYPTOGRAPHY').encode()
+
+        cipher = AES.new(key, AES.MODE_CBC, iv)
+        decrypted_password = unpad(cipher.decrypt(b64decode(encrypted_password)), AES.block_size).decode('utf-8')
+
+        user = request.user
+
+        if not user.check_password(decrypted_password):
+            return Response({'message': 'Incorrect password'}, status=status.HTTP_401_UNAUTHORIZED)
 
         patient = get_object_or_404(User, id=patient_id)
 
@@ -60,6 +79,7 @@ class DiagnosisView(APIView):
     def get(self, request, id):       
         pdf_instance = get_object_or_404(PDF, id=id)
         
+        # Filtrar o diagnóstico com base no PDF e no usuário atual
         diagnosis = Diagnosis.objects.filter(
             Q(pdf=pdf_instance) & (Q(Medical=request.user) | Q(patient=request.user))
         )
@@ -67,8 +87,28 @@ class DiagnosisView(APIView):
         if not diagnosis.exists():
             return Response({"detail": "Diagnosis not found."}, status=status.HTTP_404_NOT_FOUND)
 
-        serializer = ListDiagnosisSerializer(diagnosis, many=True)
-        return Response(data=serializer.data, status=status.HTTP_200_OK)
+        Medical = Medico.objects.get(user=request.user)
+
+        diagnosis_data = []
+        for diag in diagnosis:
+            diagnosis_data.append({
+                "id": diag.id,
+                "diagnosis": diag.diagnosis,
+                "Medical": diag.Medical.first_name,  # Nome do médico
+                "Medical_last_name": diag.Medical.last_name,  # Sobrenome do médico
+                "CRM": Medical.crm,
+                "uf_crm": Medical.uf_crm,
+                "patient": diag.patient.first_name,  # Nome do paciente
+                "patient_last_name": diag.patient.last_name,  # Sobrenome do paciente
+                "pdf": diag.pdf.file.name,  # Nome do arquivo PDF associado
+                "approved": diag.approved,
+            })
+
+        serializer = ListDiagnosisSerializer(data=diagnosis_data, many=True)
+        if serializer.is_valid():
+            return Response(data=serializer.data, status=status.HTTP_200_OK)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
 
     def put(self, request, id):
         diagnosis = get_object_or_404(Diagnosis, id=id, Medical=request.user)
